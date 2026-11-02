@@ -1,4 +1,3 @@
-import streamlit as pd_alias
 import streamlit as st
 import pandas as pd
 import folium
@@ -6,12 +5,12 @@ from streamlit_folium import st_folium
 
 # 페이지 기본 설정
 st.set_page_config(
-    page_title="외국인이 사랑하는 서울 관광지 TOP 100",
+    page_title="외국인이 사랑하는 서울 관광지 & 1박 2일 코스",
     page_icon="🗺️",
     layout="wide"
 )
 
-# 1. 외국인 선호 서울 주요 관광지 데이터 (대표 장소들로 구성된 구조화된 리스트)
+# 1. 외국인 선호 서울 주요 관광지 데이터
 tourist_spots = [
     {"name": "경복궁", "lat": 37.5796, "lon": 126.9770, "category": "역사/문화", "desc": "조선 왕조의 법궁으로, 전통 한복을 입고 관람하는 외국인 관광객들에게 가장 인기 있는 서울의 랜드마크입니다."},
     {"name": "N서울타워 (남산타워)", "lat": 37.5512, "lon": 126.9882, "category": "전망/경치", "desc": "서울의 중심 남산 정상에 위치하여 서울 전경을 360도로 조망할 수 있으며, 자물쇠 매달기 명소로 유명합니다."},
@@ -30,12 +29,11 @@ tourist_spots = [
     {"name": "덕수궁 돌담길", "lat": 37.5658, "lon": 126.9751, "category": "역사/산책", "desc": "고즈넉한 궁궐 담장을 따라 걸으며 아름다운 가로수와 현대적 미술관이 어우러진 풍경을 감상할 수 있는 산책로입니다."},
 ]
 
-# 데이터프레임 변환 (확장성을 위해 리스트 구조 활용)
 df = pd.DataFrame(tourist_spots)
 
 # 타이틀 영역
-st.title("🗺️ 외국인이 가장 사랑하는 서울 주요 관광지")
-st.markdown("유럽, 미주, 아시아 등 전 세계 외국인 관광객들이 꼭 방문하는 서울의 대표 명소들을 지도와 설명으로 만나보세요!")
+st.title("🗺️ 외국인이 가장 사랑하는 서울 주요 관광지 가이드")
+st.markdown("유럽, 미주, 아시아 등 전 세계 외국인 관광객들이 꼭 방문하는 서울의 대표 명소들을 지도, 상세 설명, 그리고 추천 일정으로 만나보세요!")
 st.divider()
 
 # 2. 필터 기능 (사이드바)
@@ -45,7 +43,6 @@ selected_category = st.sidebar.selectbox(
     options=["전체 보기"] + list(df["category"].unique())
 )
 
-# 필터 적용
 if selected_category != "전체 보기":
     filtered_df = df[df["category"] == selected_category]
 else:
@@ -53,10 +50,8 @@ else:
 
 # 3. 지도 시각화 (Folium)
 st.subheader("📍 서울 관광지도")
-# 서울 중심부 좌표 (시청 기준)
 m = folium.Map(location=[37.5665, 126.9780], zoom_start=12, tiles="CartoDB positron")
 
-# 지도에 마커 추가
 for idx, row in filtered_df.iterrows():
     folium.Marker(
         location=[row["lat"], row["lon"]],
@@ -65,16 +60,14 @@ for idx, row in filtered_df.iterrows():
         icon=folium.Icon(color="red" if "역사" in row["category"] or "랜드마크" in row["category"] else "blue", icon="info-sign")
     ).add_to(m)
 
-# Streamlit에 지도 렌더링
 st_folium(m, width=700, height=500, use_container_width=True)
 
 st.divider()
 
-# 4. 관광지 상세 설명 카드 섹션 (하단)
+# 4. 관광지 상세 설명 카드 섹션
 st.subheader("📖 관광지 상세 설명")
 st.markdown(f"총 **{len(filtered_df)}개**의 관광지가 표시되어 있습니다.")
 
-# 2열 그리드로 깔끔하게 설명 카드 배치
 cols = st.columns(2)
 for idx, row in filtered_df.reset_index().iterrows():
     col = cols[idx % 2]
@@ -84,6 +77,30 @@ for idx, row in filtered_df.reset_index().iterrows():
             st.caption(f"🏷️ 카테고리: {row['category']}")
             st.write(row['desc'])
 
+st.divider()
+
+# 5. 추가 기능: 1박 2일 추천 코스 및 식당 안내 (아침 9시 ~ 저녁 8시)
+st.subheader("🗓️ 서울 주요 명소 1박 2일 추천 코스 (09:00 ~ 20:00)")
+st.markdown("외국인 관광객들이 알차게 서울을 즐길 수 있도록 오전 9시부터 저녁 8시까지 동선을 맞춘 추천 일정과 맛집 정보입니다.")
+
+itinerary_data = [
+    {"day": "1일차", "time": "09:00 - 11:30", "type": "관광", "place": "경복궁 & 한복 체험", "detail": "조선 왕조의 법궁 관람 및 전통 한복을 입고 인생 사진 남기기"},
+    {"day": "1일차", "time": "11:30 - 13:00", "type": "점심", "place": "토속촌 삼계탕 (경복궁 인근)", "detail": "외국인 입맛에도 잘 맞는 진하고 건강한 전통 보양식 삼계탕"},
+    {"day": "1일차", "time": "13:00 - 15:00", "type": "관광", "place": "북촌한옥마을 & 삼청동", "detail": "아름다운 한옥 골목길 산책 및 전통 찻집 방문"},
+    {"day": "1일차", "time": "15:00 - 17:00", "type": "관광", "place": "인사동 문화거리", "detail": "한국 전통 공예품 구경 및 쌈지길 쇼핑"},
+    {"day": "1일차", "time": "17:00 - 19:00", "type": "관광", "place": "광장시장", "detail": "한국 전통 시장의 활기를 느끼고 빈대떡, 마약김밥 구경"},
+    {"day": "1일차", "time": "19:00 - 20:00", "type": "저녁", "place": "부촌육회 (광장시장 내)", "detail": "신선한 육회와 빈대떡 등 다양한 시장 먹거리 체험"},
+    {"day": "2일차", "time": "09:00 - 11:00", "type": "관광", "place": "N서울타워 (남산)", "detail": "케이블카를 타고 올라가 서울 전경을 한눈에 조망"},
+    {"day": "2일차", "time": "11:00 - 12:30", "type": "이동", "place": "명동 거리", "detail": "명동 대성당 방문 및 거리 산책"},
+    {"day": "2일차", "time": "12:30 - 14:00", "type": "점심", "place": "명동교자", "detail": "미쉐린 가이드에 오른 깊은 맛의 칼국수와 마늘 김치"},
+    {"day": "2일차", "time": "14:00 - 16:30", "type": "관광", "place": "동대문디자인플라자 (DDP)", "detail": "세계적인 건축 디자인 감상 및 K-패션 쇼핑"},
+    {"day": "2일차", "time": "16:30 - 19:00", "type": "관광", "place": "성수동 카페거리 & 서울숲", "detail": "힙한 팝업스토어, 감성 카페, 자연이 어우러진 핫플 탐방"},
+    {"day": "2일차", "time": "19:00 - 20:00", "type": "저녁", "place": "소문난성수감자탕", "detail": "한국 직장인과 외국인 모두에게 사랑받는 진한 감자탕"},
+]
+
+df_itinerary = pd.DataFrame(itinerary_data)
+st.dataframe(df_itinerary, use_container_width=True, hide_index=True)
+
 # 푸터
 st.markdown("---")
-st.markdown("💡 *Streamlit Cloud에 배포하여 언제 어디서나 웹으로 공유할 수 있습니다!*")
+st.markdown("💡 *Streamlit Cloud에 배포하여 웹사이트 형태로 간편하게 공유해 보세요!*")
