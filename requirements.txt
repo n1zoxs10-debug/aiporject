@@ -2,3 +2,7 @@ streamlit
 pandas
 folium
 streamlit-folium
+numpy
+scikit-learn
+plotly
+openpyxl
