@@ -6,3 +6,9 @@ numpy
 scikit-learn
 plotly
 openpyxl
+marker=dict(
+    symbol="heart",
+    size=25,
+    color="#ff1493",
+    line=dict(color="#ffffff", width=2)
+)
